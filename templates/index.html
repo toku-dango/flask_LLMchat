@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat App - AI Bot</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.4/lottie.min.js"></script>
+    <link rel="stylesheet" href="static\css\style.css">
+    
+</head>
+<body>
+    <div id="header">
+        <div id="lottie-animation"></div>
+        <h1>AI Bot</h1>
+    </div>
+    <div id="chatroom"></div>
+    <div id="send_area">
+        <input type="text" id="user_input" autocomplete="off" placeholder="Type your message...">
+        <button id="send_button" onclick="sendMessage()">Send</button>
+        <div id="loading"></div>
+    </div>
+
+    <script>
+        var mainAnimation = lottie.loadAnimation({
+            container: document.getElementById('lottie-animation'),
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'https://lottie.host/dffb1e31-78af-4548-9e7c-30fd1cbbb704/lUvwHha1IZ.json'
+        });
+
+        var loadingAnimation = lottie.loadAnimation({
+            container: document.getElementById('loading'),
+            renderer: 'svg',
+            loop: true,
+            autoplay: false,
+            path: 'https://lottie.host/26b8d518-e6b1-4287-aa67-b99aeafdf886/PPJT5dzezf.json'
+        });
+
+        var socket = io();
+
+    socket.on('reply', function(data) {
+        $('#chatroom').append($('<div>').text('Assistant: ' + data.text).addClass('message assistant'));
+        $('#chatroom').scrollTop($('#chatroom')[0].scrollHeight);
+        $('#loading').hide(); // アニメーションを非表示にする
+        $('#send_button').show(); // ボタンを再表示
+        loadingAnimation.stop(); // アニメーションを停止
+    });
+
+    function sendMessage() {
+        var text = $('#user_input').val();
+        socket.emit('message', { text: text });
+        $('#chatroom').append($('<div>').text('You: ' + text).addClass('message you'));
+        $('#user_input').val('');
+        $('#chatroom').scrollTop($('#chatroom')[0].scrollHeight);
+        $('#send_button').hide(); // ボタンを隠す
+        $('#loading').show(); // アニメーションを表示
+        loadingAnimation.play(); // アニメーションを開始
+    }
+    </script>
+</body>
+</html>
